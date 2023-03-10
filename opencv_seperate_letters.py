@@ -15,15 +15,12 @@ im = cv.resize(im, (scale_x, scale_y), interpolation=cv.INTER_NEAREST)
 alpha = 2
 beta = 3
 im = cv.convertScaleAbs(im, alpha=alpha, beta=beta)
-im_orig = im.copy() # copy of original image
-
-im =  cv.cvtColor(im, cv.COLOR_BGR2GRAY)
 
 # if the pixel is not white, make it black
 for i in range(scale_x):
     for j in range(scale_y):
-        if im[j][i] != 255:
-            im[j][i] = 0
+        if im[j][i][0] != 255 or im[j][i][1] != 255 or im[j][i][2] != 255:
+            im[j][i] = [0, 0, 0]
 
 edges = cv.Canny(im, 100, 200)
 contours, hierarchy = cv.findContours(edges, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
@@ -31,6 +28,7 @@ contours, hierarchy = cv.findContours(edges, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_S
 def cropLetter(start_x):
     print('starting at start_x: ' + str(start_x))
     initial_start_x = start_x
+    end_x = 0
 
     # add condition to stop the recursion
     if start_x >= scale_x:
@@ -56,12 +54,15 @@ def cropLetter(start_x):
             end_x = i
             break
     
-    im_crop = im_orig[:, start_x:end_x]
+    print('start_x: ' + str(start_x))
+    print('end_x: ' + str(end_x))
+
+    im_crop = im[:, start_x:end_x]
 
     try:
         cv.imwrite("./letters/letter" + str(start_x) + ".png", im_crop)
-    except:
-        print('error, or no letter found')
+    except Exception as e:
+        print(e)
         return
 
     print('range: ' + str(start_x) + ' to ' + str(end_x))
@@ -69,6 +70,3 @@ def cropLetter(start_x):
     cropLetter(end_x)
 
 cropLetter(0)
-img = cv.imread('letters/letter66.png')
-cv.imshow('im', img)
-cv.waitKey(0)

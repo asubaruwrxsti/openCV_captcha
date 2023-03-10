@@ -1,40 +1,103 @@
 import cv2 as cv
-import math
+import os
 
-img = cv.imread('public\scrapper\screenshot.png')
-height, width, channels = img.shape
+def getFiles(path):
+    files = []
+    for r, d, f in os.walk(path):
+        for file in f:
+            if '.png' in file:
+                files.append(os.path.join(r, file))
+    return files
 
-black_pixel = (0, 0, 0)
-white_pixel = (255, 255, 255)
+files = getFiles('letters')
 
-y_1 = int(height*0.34)
-y_2 = int(height*0.45)
+# y1 = 102
+# y2 = 109
 
-def fill_whites():
-    cv.line(img, (0, y_1),
-                 (int(width), y_1), black_pixel, 1)
-    cv.line(img, (0, y_2),
-                 (int(width), y_2), black_pixel, 1)
+# y1-1 = 131
+# y2-1 = 138
+def drawLine(image):
+    # get the image size
+    size_x = image.shape[1]
+    size_y = image.shape[0]
+    start_x = 0
+    end_x = 0
+    start_x2 = 0
+    end_x2 = 0
 
-def print_info():
-    print("=====================================")
-    print("IMAGE SIZE: [", height, ", ", width, "]")
-    print("starting point of line 1: ", (0, int(height*0.34)))
-    print("ending point of line 1: ", (int(width), int(height*0.34)))
-    print("starting point of line 2: ", (0, int(height*0.45)))
-    print("ending point of line 2: ", (int(width), int(height*0.45)))
-    print("y_1: ", y_1)
-    print("y_2: ", y_2)
-    print("=====================================\n")
+    # scan the y=102 line and find the first black pixel in the x axis
+    for i in range(size_x):
+        if image[102][i][0] == 0:
+            start_x = i
+            break
+    
+    # scan the y=109 line and find the first black pixel in the x axis
+    for i in range(size_x):
+        if image[109][i][0] == 0:
+            end_x = i
+            break
+    
+    # scan the y=102 line and find the first black pixel in the x axis from the end
+    for i in range(size_x-1, 0, -1):
+        if image[102][i][0] == 0:
+            start_x2 = i
+            break
+    
+    # scan the y=109 line and find the first black pixel in the x axis from the end
+    for i in range(size_x-1, 0, -1):
+        if image[109][i][0] == 0:
+            end_x2 = i
+            break
+    
+    # draw the rectangle, fill black
+    cv.rectangle(image, (start_x, 102), (end_x, 109), (255, 255, 255), 1)
+    cv.rectangle(image, (start_x2, 102), (end_x2, 109), (255, 255, 255), 1)
 
-# #first line
-# for x in range(0, 50):
-#     if ((round(img[x, y_1 + 1][0], -2) == 200).any() and (round(img[x, y_1 - 1][0], -2) == 200).any()):
-#         print("Black pixel found in (x: ", x, "y: ", y_1, ")")
-#         print("pixel: ", round(img[x, y_1 + 1][0], -2))
-#     cv.line(img, (x, y_1), (x + 1, y_1), black_pixel, 1)
+    #fill the difference of the two rectangles
+    cv.rectangle(image, (start_x, 102), (start_x2, 109), (0, 0, 0), -1)
+    cv.rectangle(image, (end_x, 102), (end_x2, 109), (0, 0, 0), -1)
 
-# #cv.line(img, (13, 17), (27, 17), black_pixel, 1)
+    # get the image size
+    size_x = image.shape[1]
+    size_y = image.shape[0]
+    start_x = 0
+    end_x = 0
+    start_x2 = 0
+    end_x2 = 0
 
-# cv.imshow('image', img)
-# cv.waitKey(0)
+    # scan the y=102 line and find the first black pixel in the x axis
+    for i in range(size_x):
+        if image[131][i][0] == 0:
+            start_x = i
+            break
+    
+    # scan the y=109 line and find the first black pixel in the x axis
+    for i in range(size_x):
+        if image[138][i][0] == 0:
+            end_x = i
+            break
+    
+    # scan the y=102 line and find the first black pixel in the x axis from the end
+    for i in range(size_x-1, 0, -1):
+        if image[131][i][0] == 0:
+            start_x2 = i
+            break
+    
+    # scan the y=109 line and find the first black pixel in the x axis from the end
+    for i in range(size_x-1, 0, -1):
+        if image[138][i][0] == 0:
+            end_x2 = i
+            break
+    
+    # draw the rectangle, fill black
+    cv.rectangle(image, (start_x, 131), (end_x, 138), (255, 255, 255), 1)
+    cv.rectangle(image, (start_x2, 131), (end_x2, 138), (255, 255, 255), 1)
+
+    #fill the difference of the two rectangles
+    cv.rectangle(image, (start_x, 131), (start_x2, 138), (0, 0, 0), -1)
+    cv.rectangle(image, (end_x, 131), (end_x2, 138), (0, 0, 0), -1)
+
+    cv.imshow('image', image)
+    cv.waitKey(0)
+
+drawLine(cv.imread(files[0]))
